@@ -1,10 +1,9 @@
 import operator
 from functools import reduce
 
-# from langchain_openai import ChatOpenAI
-
 from langchain_community.llms import VLLM
 from langchain_community.llms import VLLMOpenAI
+from langchain_openai import ChatOpenAI
 
 from pydantic.v1 import SecretStr
 
@@ -65,6 +64,12 @@ class VLLMComponent(LCModelComponent):
             value=0.95,
             range_spec=RangeSpec(step_type='float',min=0.0, max=1.0),
         ),
+        DictInput(
+            name="model_kwargs",
+            display_name="Model Kwargs",
+            advanced=True,
+            info="Additional keyword arguments to pass to the model.",
+        ),
         *LCModelComponent._base_inputs,
     ]
 
@@ -99,7 +104,18 @@ class VLLMComponent(LCModelComponent):
     def build_model(self) -> LanguageModel :
         # print(urljoin(self.base_url, "/v1"))
         
-        output = VLLMOpenAI(
+        # output = VLLMOpenAI(
+        #     openai_api_key="EMPTY",
+        #     openai_api_base=urljoin(self.base_url, "/v1"),
+        #     model_name=self.model_name,        
+        #     max_tokens=self.max_tokens,
+        #     # max_tokens=None,
+        #     top_p=self.top_p,
+        #     temperature=self.temperature,
+        #     model_kwargs=self.model_kwargs or {}
+        # )
+
+        output = ChatOpenAI(
             openai_api_key="EMPTY",
             openai_api_base=urljoin(self.base_url, "/v1"),
             model_name=self.model_name,        
@@ -107,21 +123,7 @@ class VLLMComponent(LCModelComponent):
             # max_tokens=None,
             top_p=self.top_p,
             temperature=self.temperature,
-            model_kwargs={"stop": ["."]}
+            model_kwargs=self.model_kwargs or {}
         )
-
-
-        # output = VLLMOpenAI(
-        #     openai_api_key="EMPTY",
-        #     openai_api_base="http://localhost:8000/v1",
-        #     model_name="Qwen/Qwen2.5-0.5B-Instruct",
-        #     model_kwargs={"stop": [".", "?"]},
-        #     top_p=0.95,
-        #     max_tokens=None,
-        #     temperature=0.9,
-        # )
         
-
-        # output = None
-
         return output
