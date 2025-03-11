@@ -15,6 +15,7 @@ log_level ?= debug
 host ?= 0.0.0.0
 port ?= 7860
 env ?= .env
+# env ?= /home/hadoop/Agent_code/lf-project/.env
 open_browser ?= true
 path = src/backend/base/langflow/frontend
 workers ?= 1
@@ -282,7 +283,7 @@ ifdef login
 		--loop asyncio \
 		$(if $(workers),--workers $(workers),)
 else
-	@echo "Running backend respecting the $(env) file";
+	@echo "Running backend respecting the $(env) file?";
 	uv run uvicorn \
 		--factory langflow.main:create_app \
 		--host 0.0.0.0 \

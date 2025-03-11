@@ -93,13 +93,29 @@ async def _new_flow(
         db_flow = Flow.model_validate(flow, from_attributes=True)
         db_flow.updated_at = datetime.now(timezone.utc)
 
-        if db_flow.folder_id is None:
-            # Make sure flows always have a folder
+        is_owner_folder = (
+                await session.exec(
+                    select(Folder).where(Folder.id == db_flow.folder_id, Folder.user_id == user_id)
+                )
+            ).first()
+
+        if (db_flow.folder_id is None) or (not is_owner_folder):
+            # Tìm thư mục mặc định của người dùng
             default_folder = (
-                await session.exec(select(Folder).where(Folder.name == DEFAULT_FOLDER_NAME, Folder.user_id == user_id))
+                await session.exec(
+                    select(Folder).where(Folder.name == DEFAULT_FOLDER_NAME, Folder.user_id == user_id)
+                )
             ).first()
             if default_folder:
                 db_flow.folder_id = default_folder.id
+  
+        # if db_flow.folder_id is None:
+        #     # Make sure flows always have a folder
+        #     default_folder = (
+        #         await session.exec(select(Folder).where(Folder.name == DEFAULT_FOLDER_NAME, Folder.user_id == user_id))
+        #     ).first()
+        #     if default_folder:
+        #         db_flow.folder_id = default_folder.id
 
         session.add(db_flow)
     except Exception as e:

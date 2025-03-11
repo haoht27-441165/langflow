@@ -122,6 +122,16 @@ async def read_folder(
     is_flow: bool = False,
     search: str = "",
 ):
+
+    is_owner_folder = (
+                await session.exec(
+                    select(Folder).where(Folder.id == folder_id)
+                )
+            ).first()
+
+    if (not is_owner_folder) or is_owner_folder.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to this folder")
+
     try:
         folder = (
             await session.exec(
