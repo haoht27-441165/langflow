@@ -18,12 +18,13 @@ from langflow.schema import Data
 
 class SaveTextComponent(LCToolComponent):
     display_name = "Python text save"
-    description = "A tool for text save."
+    description = "A test tool for save file txt, can use PythonREPL don't use me."
     name = "text_save"
     icon = "Python"
 
     inputs = [
         StrInput(name="text", display_name="text to save", info="something"),
+        StrInput(name="path", display_name="path to save", info="something"),
 
     ]
 
@@ -39,15 +40,28 @@ class SaveTextComponent(LCToolComponent):
         
         def _run_save_text(text:str) -> str:
             try:
-                # Use eval to execute the pandas query
-                with open('/home/hadoop/Agent_code/lf-project/test_save.txt', 'w') as f:
-                    f.write(text) 
-                # while
-                # df = pd.read_csv(self.path)
                 
-                # result = df.query(query)
-                return 'Done save text'
-            
+                if self.path:
+                   if not self.path.endswith(".txt"):
+                       
+                        old_path = self.path.split('/')
+                        if '.' not in old_path[-1]:
+                            file_name = 'new_file.txt'
+                            old_path.append(file_name)
+                        else:
+                            file_name = old_path[-1].split('.')
+                            file_name = file_name[0]+'.txt'
+                            old_path[-1] = file_name
+              
+                        self.path = '/'.join(old_path)                # save
+                        with open(self.path, 'w') as f:
+                            f.write(text) 
+          
+                        return 'Done save text'
+                else :
+                    raise ValueError("Path is empty. Cannot save file.")
+
+                
             except Exception as e:
                 return f"Error executing saving: {str(e)}"
         
